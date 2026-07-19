@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет - Дневник</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; }
+        .info { font-size: 18px; color: #555; margin-bottom: 20px; }
+
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 30px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #34495e; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+
+        .badge-grade { background: #2ecc71; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .logout-btn { display: inline-block; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .logout-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Личный кабинет</h1>
+    <p class="info">{{ message }}</p>
+    {% if group_info %}<p class="info"><strong>{{ group_info }}</strong></p>{% endif %}
+
+    <hr>
+
+    {% if user.role == 'STUDENT' %}
+        <h2>📅 Моё расписание</h2>
+        {% if schedule %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>День недели</th>
+                        <th>Урок №</th>
+                        <th>Предмет</th>
+                        <th>Кабинет</th>
+                        <th>Учитель</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in schedule %}
+                        <tr>
+                            <td><strong>{{ item.get_weekday_display }}</strong></td>
+                            <td>{{ item.lesson_number }}</td>
+                            <td>{{ item.subject.name }}</td>
+                            <td>{{ item.classroom|default:"—" }}</td>
+                            <td>{{ item.teacher.get_full_name|default:item.teacher.username }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Расписание для твоего класса пока не заполнено.</p>
+        {% endif %}
+
+        <h2>📊 Мои оценки</h2>
+        {% if grades %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Предмет</th>
+                        <th>Оценка</th>
+                        <th>Учитель</th>
+                        <th>Комментарий</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                        <tr>
+                            <td>{{ grade.date|date:"d.m.Y" }}</td>
+                            <td>{{ grade.subject.name }}</td>
+                            <td><span class="badge-grade">{{ grade.value }}</span></td>
+                            <td>{{ grade.teacher.get_full_name|default:grade.teacher.username }}</td>
+                            <td><small style="color: #666;">{{ grade.comment|default:"" }}</small></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>У тебя пока нет оценок.</p>
+        {% endif %}
+    {% endif %}
+
+    <hr>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">Выйти из системы</button>
+    </form>
+</div>
+
+</body>
+</html>
