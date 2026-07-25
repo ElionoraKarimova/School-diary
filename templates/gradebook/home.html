@@ -1,278 +1,151 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Student Portal</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background-color: #F4F6F9;
-            margin: 0;
-            padding: 0;
-            color: #333333;
-            font-size: 16px;
-            line-height: 1.5;
-        }
-        .header {
-            background-color: #1A365D;
-            color: #FFFFFF;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
-        .main-container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .card {
-            background: #FFFFFF;
-            padding: 25px;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
-        h2 { color: #1A365D; font-size: 20px; margin-top: 0; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px 15px; border: 1px solid #E2E8F0; text-align: left; }
-        th { background-color: #2D3748; color: #FFFFFF; font-weight: 600; }
-        tr:nth-child(even) { background-color: #F8FAFC; }
-        .badge-grade {
-            background-color: #2F855A;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .lesson-link {
-            display: inline-block;
-            padding: 10px 18px;
-            background-color: #2B6CB0;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        .lesson-link:hover { background-color: #2C5282; }
-        .btn-add { background-color: #2F855A; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .btn-add:hover { background-color: #22543D; }
-        .logout-btn {
-            background-color: transparent;
-            color: #FFFFFF;
-            border: 1px solid #FFFFFF;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .logout-btn:hover { background-color: rgba(255,255,255,0.1); }
-        .form-inline { display: flex; gap: 10px; align-items: center; }
-        .form-inline select, .form-inline input { padding: 8px; border: 1px solid #CBD5E0; border-radius: 4px; font-family: inherit; }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<div class="header">
-    <div class="header-container">
-        <h1>Электронный дневник</h1>
-        <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="logout-btn">Выйти</button>
-        </form>
+{% block title %}Дневник{% endblock %}
+
+{% block content %}
+<style>
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .day-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+    }
+    .day-title {
+        font-weight: bold;
+        color: #1A365D;
+        border-bottom: 2px solid #3182ce;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+    }
+    .lesson-item {
+        background: #ffffff;
+        border: 1px solid #cbd5e0;
+        padding: 8px 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        text-decoration: none;
+        color: #2d3748;
+        display: block;
+        transition: all 0.2s;
+    }
+    .lesson-item:hover {
+        background: #ebf8ff;
+        border-color: #3182ce;
+    }
+
+    .diary-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .day-block {
+        background: #ffffff;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .day-header {
+        background: #1A365D;
+        color: white;
+        padding: 10px 15px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        font-size: 16px;
+    }
+    .diary-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .diary-table th, .diary-table td {
+        border: 1px solid #e2e8f0;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .diary-table th {
+        background: #edf2f7;
+        color: #4a5568;
+        font-weight: 600;
+        text-align: left;
+    }
+    .col-num { width: 50px; text-align: center; }
+    .col-subject { width: 220px; font-weight: 500; }
+    .col-hw { color: #4a5568; }
+    .col-grade { width: 80px; text-align: center; font-weight: bold; font-size: 16px; color: #2b6cb0; }
+</style>
+
+<h2>Здравствуйте, {{ user.get_full_name|default:user.username }}!</h2>
+
+{% if user.role == 'TEACHER' %}
+    <h3>Ваше расписание на неделю</h3>
+    <p><small>Выберите предмет, чтобы открыть журнал на отдельной странице.</small></p>
+    <div class="schedule-grid">
+        {% for day_name, lessons in schedule_by_day.items %}
+            <div class="day-card">
+                <div class="day-title">{{ day_name }}</div>
+                {% for lesson in lessons %}
+                    <a href="{% url 'journal_detail' lesson.slug %}" class="lesson-item">
+                        <strong>№{{ lesson.lesson_number }} {{ lesson.subject.name }}</strong><br>
+                        <small>Класс: {{ lesson.group.name }}</small>
+                    </a>
+                {% empty %}
+                    <small style="color: #a0aec0;">Нет уроков</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
     </div>
-</div>
 
-<div class="main-container">
-    <div class="card">
-        <p style="font-size: 18px; margin: 0; font-weight: 600; color: #2D3748;">{{ message }}</p>
-        {% if group_info %}<p style="margin: 5px 0 0 0; color: #4A5568;">{{ group_info }}</p>{% endif %}
-    </div>
+{% else %}
+    <div class="diary-container">
+        <h3>Электронный дневник</h3>
 
-    {% if user.role == 'STUDENT' %}
-        <div class="card">
-            <h2>📅 Расписание занятий</h2>
-            {% if schedule %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>День недели</th>
-                            <th>Урок</th>
-                            <th>Предмет</th>
-                            <th>Кабинет</th>
-                            <th>Учитель</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in schedule %}
-                            <tr>
-                                <td><strong>{{ item.get_weekday_display }}</strong></td>
-                                <td>№ {{ item.lesson_number }}</td>
-                                <td>{{ item.subject.name }}</td>
-                                <td>{{ item.classroom|default:"—" }}</td>
-                                <td>{{ item.teacher.get_full_name|default:item.teacher.username }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Расписание пока не заполнено.</p>
-            {% endif %}
-        </div>
-
-        <div class="card">
-            <h2>📝 Домашние задания</h2>
-            {% if homeworks %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Предмет</th>
-                            <th>Задание</th>
-                            <th>Срок сдачи</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for hw in homeworks %}
-                            <tr>
-                                <td><strong>{{ hw.subject.name }}</strong></td>
-                                <td>{{ hw.task }}</td>
-                                <td>{{ hw.due_date|date:"d.m.Y" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Актуальных домашних заданий нет.</p>
-            {% endif %}
-        </div>
-
-        <div class="card">
-            <h2>📊 Текущая успеваемость</h2>
-            {% if grades %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Дата</th>
-                            <th>Предмет</th>
-                            <th>Оценка</th>
-                            <th>Учитель</th>
-                            <th>Комментарий</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for grade in grades %}
-                            <tr>
-                                <td>{{ grade.date|date:"d.m.Y" }}</td>
-                                <td>{{ grade.subject.name }}</td>
-                                <td><span class="badge-grade">{{ grade.value }}</span></td>
-                                <td>{{ grade.teacher.get_full_name|default:grade.teacher.username }}</td>
-                                <td><small style="color: #4A5568;">{{ grade.comment|default:"" }}</small></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Оценок пока нет.</p>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    {% if user.role == 'TEACHER' %}
-        <div class="card">
-            <h2>📚 Ваши учебные классы:</h2>
-            {% if teacher_lessons %}
-                <div>
-                    {% for lesson in teacher_lessons %}
-                        <a href="?group={{ lesson.group.id }}&subject={{ lesson.subject.id }}" class="lesson-link">
-                            {{ lesson.group.name }} — {{ lesson.subject.name }}
-                        </a>
-                    {% endfor %}
+        {% for day in diary_by_day %}
+            <div class="day-block">
+                <div class="day-header">
+                    {{ day.day_name }} — {{ day.date }}
                 </div>
-            {% else %}
-                <p>За вами не закреплено уроков в расписании.</p>
-            {% endif %}
-        </div>
-
-        {% if selected_lesson %}
-            <div class="card">
-                <h2>📋 Журнал класса: {{ selected_lesson.group.name }} ({{ selected_lesson.subject.name }})</h2>
-                {% if students %}
-                    <table>
-                        <thead>
+                <table class="diary-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">№</th>
+                            <th class="col-subject">Предмет</th>
+                            <th class="col-hw">Домашнее задание</th>
+                            <th class="col-grade">Оценка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in day.lessons %}
                             <tr>
-                                <th>Ученик</th>
-                                <th>Выставить оценку</th>
+                                <td class="col-num">{{ lesson.number }}</td>
+                                <td class="col-subject">{{ lesson.subject }}</td>
+                                <td class="col-hw">
+                                    {% if lesson.homework %}
+                                        {{ lesson.homework }}
+                                    {% else %}
+                                        <span style="color: #a0aec0;">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="col-grade">
+                                    {% if lesson.grade %}
+                                        {{ lesson.grade }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {% for student in students %}
-                                <tr>
-                                    <td><strong>{{ student.get_full_name|default:student.username }}</strong></td>
-                                    <td>
-                                        <form method="post" class="form-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="student_id" value="{{ student.id }}">
-                                            <input type="hidden" name="subject_id" value="{{ selected_lesson.subject.id }}">
-
-                                            <select name="grade_value" required>
-                                                <option value="">Балл...</option>
-                                                <option value="5">5 (Отлично)</option>
-                                                <option value="4">4 (Хорошо)</option>
-                                                <option value="3">3 (Удовл.)</option>
-                                                <option value="2">2 (Неуд.)</option>
-                                            </select>
-
-                                            <input type="text" name="comment" placeholder="Комментарий" style="width: 250px;">
-
-                                            <button type="submit" name="sub_grade" class="btn-add">Сохранить</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>В выбранном классе нет учеников.</p>
-                {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-
-            <div class="card">
-                <h2>📝 Выдать домашнее задание</h2>
-                <form method="post" style="display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
-                    {% csrf_token %}
-                    <input type="hidden" name="subject_id" value="{{ selected_lesson.subject.id }}">
-
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #2D3748;">Текст задания:</label>
-                        <input type="text" name="task" required placeholder="Например: Учебник стр. 45, упр. 3"
-                               style="width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; font-family: inherit; font-size: 15px;">
-                    </div>
-
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #2D3748;">Срок сдачи:</label>
-                        <input type="date" name="due_date" required
-                               style="width: 200px; padding: 10px; border: 1px solid #CBD5E0; border-radius: 4px; font-family: inherit; font-size: 15px;">
-                    </div>
-
-                    <div>
-                        <button type="submit" name="sub_homework" class="btn-add" style="padding: 10px 20px; font-size: 15px;">Опубликовать задание</button>
-                    </div>
-                </form>
-            </div>
-        {% endif %}
-    {% endif %}
-</div>
-
-</body>
-</html>
+        {% empty %}
+            <p>Расписание для вашего класса пока не заполнено.</p>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

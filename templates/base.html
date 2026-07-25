@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Электронный дневник{% endblock %}</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background-color: #f7fafc; color: #2d3748; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        nav { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        nav a { color: #3182ce; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/"> Электронный дневник</a>
+            {% if user.is_authenticated %}
+                <span>{{ user.username }} | <a href="/logout/">Выйти</a></span>
+            {% else %}
+                <a href="/login/">Войти</a>
+            {% endif %}
+        </nav>
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

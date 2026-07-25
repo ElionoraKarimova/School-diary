@@ -1,87 +1,151 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Schedule, Grade, Homework
+from .models import Schedule, Grade, Homework, Group, Subject
 from users.models import User
 import datetime
 
 
 @login_required
 def home_view(request):
+
     user = request.user
+    context = {'user': user}
+
+    if user.role == 'TEACHER':
+        schedule = Schedule.objects.filter(teacher=user).select_related('group', 'subject').order_by('weekday',
+                                                                                                     'lesson_number')
+        weekdays = {1: 'Понедельник', 2: 'Вторник', 3: 'Среда', 4: 'Четверг', 5: 'Пятница', 6: 'Суббота'}
+        schedule_by_day = {day_name: [] for day_name in weekdays.values()}
+
+        for item in schedule:
+            day_name = weekdays.get(item.weekday, 'Другой день')
+            schedule_by_day[day_name].append(item)
+
+        context['schedule_by_day'] = schedule_by_day
+
+    elif user.role == 'STUDENT':
+        if user.group:
+            weekdays = {
+                1: 'ПОНЕДЕЛЬНИК',
+                2: 'ВТОРНИК',
+                3: 'СРЕДА',
+                4: 'ЧЕТВЕРГ',
+                5: 'ПЯТНИЦА',
+                6: 'СУББОТА'
+            }
+
+            today = datetime.date.today()
+            monday = today - datetime.timedelta(days=today.weekday())
+
+            schedules = Schedule.objects.filter(group=user.group).select_related('subject', 'teacher').order_by(
+                'weekday', 'lesson_number')
+
+            grades = Grade.objects.filter(student=user).select_related('subject')
+            grades_map = {g.subject_id: g.value for g in grades}
+
+            homeworks = Homework.objects.filter(schedule__group=user.group).select_related('schedule').order_by('-date')
+            hw_map = {}
+            for hw in homeworks:
+                if hw.schedule_id not in hw_map:
+                    hw_map[hw.schedule_id] = hw.task
+
+            diary_by_day = []
+            for day_num, day_name in weekdays.items():
+
+                day_date = monday + datetime.timedelta(days=day_num - 1)
+
+                day_lessons = [s for s in schedules if s.weekday == day_num]
+                lessons_data = []
+
+                for lesson in day_lessons:
+                    lessons_data.append({
+                        'number': lesson.lesson_number,
+                        'subject': lesson.subject.name,
+                        'homework': hw_map.get(lesson.id, ''),
+                        'grade': grades_map.get(lesson.subject_id, '')
+                    })
+
+                if lessons_data:
+                    diary_by_day.append({
+                        'day_name': day_name,
+                        'date': day_date.strftime('%d.%m.%Y'),
+                        'lessons': lessons_data
+                    })
+
+            context['diary_by_day'] = diary_by_day
+    return render(request, 'gradebook/home.html', context)
+
+
+
+
+
+@login_required
+def journal_view(request, slug):
+
+    user = request.user
+    if user.role != 'TEACHER':
+        return redirect('home')
+
+    current_schedule = get_object_or_404(Schedule, slug=slug, teacher=user)
+
+   
+    if request.method == 'POST':
+        if 'save_grade' in request.POST:
+            student_id = request.POST.get('student_id')
+            date_str = request.POST.get('date')
+            val = request.POST.get('value', '').strip()
+
+            if student_id and date_str:
+                if val:
+                    Grade.objects.update_or_create(
+                        student_id=student_id,
+                        subject=current_schedule.subject,
+                        date=date_str,
+                        defaults={'value': int(val), 'teacher': user}
+                    )
+                else:
+                    Grade.objects.filter(
+                        student_id=student_id,
+                        subject=current_schedule.subject,
+                        date=date_str
+                    ).delete()
+
+        elif 'save_homework' in request.POST:
+            date_str = request.POST.get('date')
+            task = request.POST.get('task', '').strip()
+
+            if date_str:
+                if task:
+                    Homework.objects.update_or_create(
+                        schedule=current_schedule,
+                        date=date_str,
+                        defaults={'task': task}
+                    )
+                else:
+                    Homework.objects.filter(schedule=current_schedule, date=date_str).delete()
+
+        return redirect('journal_detail', slug=slug)
+
+  
+    students = User.objects.filter(group=current_schedule.group, role='STUDENT').order_by('last_name', 'first_name')
+    today = datetime.date.today()
+    dates = [today - datetime.timedelta(days=i) for i in range(6, -1, -1)]
+
+    grades = Grade.objects.filter(
+        subject=current_schedule.subject,
+        student__group=current_schedule.group
+    ).select_related('student')
+    grade_map = {(g.student_id, g.date.strftime('%Y-%m-%d')): g for g in grades}
+
+    homeworks = Homework.objects.filter(schedule=current_schedule)
+    hw_map = {hw.date.strftime('%Y-%m-%d'): hw.task for hw in homeworks}
+
     context = {
         'user': user,
+        'current_schedule': current_schedule,
+        'students': students,
+        'dates': dates,
+        'grade_map': grade_map,
+        'hw_map': hw_map,
     }
-
-    if user.role == 'STUDENT':
-        context['message'] = f"Добро пожаловать в дневник, ученик {user.get_full_name() or user.username}!"
-        if user.group:
-            context['group_info'] = f"Твой класс: {user.group.name}"
-
-            schedule = Schedule.objects.filter(group=user.group).select_related('subject', 'teacher').order_by(
-                'weekday', 'lesson_number')
-            context['schedule'] = schedule
-
-
-            homeworks = Homework.objects.filter(schedule__group=user.group,
-                                                date__gte=datetime.date.today()).select_related(
-                'schedule__subject').order_by('date')
-            context['homeworks'] = homeworks
-
-        grades = Grade.objects.filter(student=user).select_related('subject', 'teacher').order_by('-date')
-        context['grades'] = grades
-
-    elif user.role == 'TEACHER':
-        context['message'] = f"Здравствуйте, уважаемый учитель {user.get_full_name() or user.username}!"
-
-        teacher_lessons = Schedule.objects.filter(teacher=user).select_related('group', 'subject').distinct('group',
-                                                                                                            'subject')
-        context['teacher_lessons'] = teacher_lessons
-
-        selected_group_id = request.GET.get('group')
-        selected_subject_id = request.GET.get('subject')
-
-        if selected_group_id and selected_subject_id:
-            lesson = Schedule.objects.filter(teacher=user, group_id=selected_group_id,
-                                             subject_id=selected_subject_id).first()
-            if lesson:
-                context['selected_lesson'] = lesson
-                context['students'] = User.objects.filter(group_id=selected_group_id, role='STUDENT')
-
-        if request.method == 'POST':
-            if 'sub_grade' in request.POST:
-                student_id = request.POST.get('student_id')
-                subject_id = request.POST.get('subject_id')
-                grade_value = request.POST.get('grade_value')
-                comment = request.POST.get('comment', '')
-
-                if student_id and subject_id and grade_value:
-                    Grade.objects.create(
-                        student_id=student_id,
-                        subject_id=subject_id,
-                        teacher=user,
-                        value=int(grade_value),
-                        comment=comment,
-                        date=datetime.date.today()
-                    )
-                    return redirect(f"/?group={selected_group_id}&subject={selected_subject_id}")
-
-            elif 'sub_homework' in request.POST:
-                task_text = request.POST.get('task')
-                due_date_str = request.POST.get('due_date')
-
-
-                if selected_group_id and selected_subject_id and task_text and due_date_str:
-                    lesson = Schedule.objects.filter(teacher=user, group_id=selected_group_id,
-                                                     subject_id=selected_subject_id).first()
-                    if lesson:
-                        Homework.objects.create(
-                            schedule=lesson,
-                            task=task_text,
-                            date=due_date_str
-                        )
-                    return redirect(f"/?group={selected_group_id}&subject={selected_subject_id}")
-
-    else:
-        context['message'] = f"Добро пожаловать в панель управления, {user.username}!"
-
-    return render(request, 'gradebook/home.html', context)
+    return render(request, 'gradebook/journal.html', context)

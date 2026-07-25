@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load gradebook_extras %}
+
+{% block title %}Журнал | {{ current_schedule.group.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .journal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .back-btn {
+        padding: 8px 16px;
+        background: #e2e8f0;
+        color: #2d3748;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    .journal-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: white;
+    }
+    .journal-table th, .journal-table td {
+        border: 1px solid #cbd5e0;
+        padding: 8px;
+        text-align: center;
+    }
+    .journal-table th {
+        background-color: #1A365D;
+        color: white;
+    }
+
+    .date-header {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .date-header:hover {
+        background-color: #2b6cb0;
+    }
+
+    /* Подсветка ДЗ */
+    .hw-badge {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .hw-badge.active {
+        background: #38a169;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 0 5px rgba(56, 161, 105, 0.8);
+    }
+
+    .grade-input {
+        width: 42px;
+        height: 32px;
+        text-align: center;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 15px;
+        color: #2d3748;
+    }
+    .grade-input:focus {
+        outline: none;
+        border-color: #3182ce;
+        background: #ebf8ff;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+    }
+</style>
+
+<div class="journal-header">
+    <h2> Журнал: {{ current_schedule.group.name }} — {{ current_schedule.subject.name }}</h2>
+    <a href="{% url 'home' %}" class="back-btn">️ К расписанию</a>
+</div>
+
+<p><small>💡 Нажимайте на **дату в шапке**, чтобы задать ДЗ. Оценки сохраняются автоматически при изменении ячейки.</small></p>
+
+<table class="journal-table">
+    <thead>
+        <tr>
+            <th style="text-align: left; width: 250px;">Ученик</th>
+            {% for d in dates %}
+                {% get_hw hw_map d as current_hw_task %}
+                <th class="date-header" onclick="openHwModal('{{ d|date:'Y-m-d' }}', '{{ current_hw_task|escapejs }}')">
+                    {{ d|date:"d.m" }}<br>
+                    {% if current_hw_task %}
+                        <span class="hw-badge active">️ ДЗ ✓</span>
+                    {% else %}
+                        <span class="hw-badge">️ + ДЗ</span>
+                    {% endif %}
+                </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+            <tr>
+                <td style="text-align: left; font-weight: 500;">
+                    {{ student.get_full_name|default:student.username }}
+                </td>
+                {% for d in dates %}
+                    <td>
+                        <form method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="save_grade" value="1">
+                            <input type="hidden" name="student_id" value="{{ student.id }}">
+                            <input type="hidden" name="date" value="{{ d|date:'Y-m-d' }}">
+                            <input type="text" name="value" class="grade-input"
+                                   value="{% get_grade grade_map student.id d %}"
+                                   maxlength="1"
+                                   placeholder="-"
+                                   onchange="this.form.submit()">
+                        </form>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="8">В этом классе пока нет учеников</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="hwModal" class="modal">
+    <div class="modal-content">
+        <h4 id="hwModalTitle">Домашнее задание</h4>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="save_homework" value="1">
+            <input type="hidden" id="hwDateInput" name="date">
+            <div style="margin: 15px 0;">
+                <textarea id="hwTaskInput" name="task" rows="4" style="width: 100%; border-radius: 4px; border: 1px solid #cbd5e0; padding: 8px;" placeholder="Введите текст задания..."></textarea>
+            </div>
+            <div style="text-align: right;">
+                <button type="button" onclick="closeHwModal()" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer;">Отмена</button>
+                <button type="submit" style="padding: 6px 12px; background: #3182ce; color: white; border: none; border-radius: 4px; cursor: pointer;">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openHwModal(dateStr, currentTask) {
+        document.getElementById('hwModalTitle').innerText = 'Домашнее задание на ' + dateStr;
+        document.getElementById('hwDateInput').value = dateStr;
+        document.getElementById('hwTaskInput').value = currentTask;
+        document.getElementById('hwModal').style.display = 'flex';
+    }
+
+    function closeHwModal() {
+        document.getElementById('hwModal').style.display = 'none';
+    }
+</script>
+{% endblock %}
