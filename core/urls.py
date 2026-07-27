@@ -17,10 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from gradebook.views import home_view, journal_view
+from rest_framework.routers import DefaultRouter
+from gradebook.api_views import ScheduleViewSet, GradeViewSet, HomeworkViewSet
+
+router = DefaultRouter()
+router.register(r'schedules', ScheduleViewSet, basename='api-schedules')
+router.register(r'grades', GradeViewSet, basename='api-grades')
+router.register(r'homeworks', HomeworkViewSet, basename='api-homeworks')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('django.contrib.auth.urls')),
     path('', home_view, name='home'),
     path('journal/<slug:slug>/', journal_view, name='journal_detail'),
+    path('api/v1/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
 ]
