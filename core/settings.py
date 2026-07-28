@@ -15,17 +15,21 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import environ
 
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-sc_myzeh68w^texvh6&znyudx!3b-5cd%j4)65pf^if3d)*o#0'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+
 
 
 # Application definition
@@ -76,16 +80,16 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-import os
+
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'school_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'school_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'school_password'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+'default': {
+           'ENGINE': 'django.db.backends.postgresql',
+           'NAME': env('POSTGRES_DB', default='school_db'),
+           'USER': env('POSTGRES_USER', default='school_user'),
+           'PASSWORD': env('POSTGRES_PASSWORD', default='school_password'),
+           'HOST': env('POSTGRES_HOST', default='db'),
+           'PORT': env('POSTGRES_PORT', default='5432'),
     }
 }
 
