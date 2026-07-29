@@ -2,7 +2,7 @@
 
 A Django + Django REST Framework backend for school process automation — featuring a digital gradebook for teachers and a user-friendly weekly planner (Student Dashboard) for students.
 
- The project is fully containerized with Docker and exposes both a web UI and a REST API ready for integration with mobile apps and third-party services.
+The project is fully containerized with Docker and exposes both a web UI and a REST API ready for integration with mobile apps and third-party services.
 
 ## Features
 
@@ -25,23 +25,38 @@ A Django + Django REST Framework backend for school process automation — featu
 ## Running the project
 
 1. Clone the repository:
-git clone https://github.com/ElionoraKarimova/School-diary.git
-cd School-diary
+   ```
+   git clone https://github.com/ElionoraKarimova/School-diary.git
+   cd School-diary
+   ```
 
 2. Copy `.env.example` to `.env` and fill in the values:
-cp .env.example .env
+   ```
+   cp .env.example .env
+   ```
+
 3. Build and start the containers:
-docker-compose up --build
+   ```
+   docker-compose up --build
+   ```
+
 4. The app will be available at `http://localhost:8000`
 
 5. Interactive API documentation (Swagger): `http://localhost:8000/api/docs/`
 
 ## Running tests
 
+```
 docker compose exec web pytest -v
+```
+
 ## Code style
+
+```
 docker compose exec web flake8 .
 docker compose exec web black --check .
+```
+
 ## Main API endpoints
 
 - `/api/v1/grades/` — grades (filterable by `subject`, `student`, `date`; write access restricted to teachers)
