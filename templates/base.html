@@ -21,9 +21,17 @@
                 <a href="/login/">Войти</a>
             {% endif %}
         </nav>
+{% if messages %}
+            {% for message in messages %}
+                <div style="padding: 10px 15px; margin-bottom: 15px; border-radius: 6px; background: #fed7d7; color: #822727; font-weight: 500;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
         {% block content %}
         {% endblock %}
+       
     </div>
 </body>
 </html>

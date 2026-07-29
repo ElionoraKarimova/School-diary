@@ -130,7 +130,7 @@
                             <input type="hidden" name="date" value="{{ d|date:'Y-m-d' }}">
                             <input type="text" name="value" class="grade-input"
                                    value="{% get_grade grade_map student.id d %}"
-                                   maxlength="1"
+                                   maxlength="2"
                                    placeholder="-"
                                    onchange="this.form.submit()">
                         </form>

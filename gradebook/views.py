@@ -1,9 +1,10 @@
+from .forms import GradeForm, HomeworkForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Schedule, Grade, Homework, Group, Subject
 from users.models import User
 import datetime
-
+from django.contrib import messages
 
 @login_required
 def home_view(request):
@@ -81,27 +82,26 @@ def home_view(request):
 
 @login_required
 def journal_view(request, slug):
-
     user = request.user
     if user.role != 'TEACHER':
         return redirect('home')
 
     current_schedule = get_object_or_404(Schedule, slug=slug, teacher=user)
 
-   
     if request.method == 'POST':
         if 'save_grade' in request.POST:
-            student_id = request.POST.get('student_id')
-            date_str = request.POST.get('date')
-            val = request.POST.get('value', '').strip()
+            form = GradeForm(request.POST)
+            if form.is_valid():
+                student_id = form.cleaned_data['student_id']
+                date_str = form.cleaned_data['date']
+                val = form.cleaned_data['value']
 
-            if student_id and date_str:
-                if val:
+                if val is not None:
                     Grade.objects.update_or_create(
                         student_id=student_id,
                         subject=current_schedule.subject,
                         date=date_str,
-                        defaults={'value': int(val), 'teacher': user}
+                        defaults={'value': val, 'teacher': user}
                     )
                 else:
                     Grade.objects.filter(
@@ -109,12 +109,15 @@ def journal_view(request, slug):
                         subject=current_schedule.subject,
                         date=date_str
                     ).delete()
+            else:
+                messages.error(request, "Grade must be a number between 0 and 10.")
+
 
         elif 'save_homework' in request.POST:
-            date_str = request.POST.get('date')
-            task = request.POST.get('task', '').strip()
-
-            if date_str:
+            form = HomeworkForm(request.POST)
+            if form.is_valid():
+                date_str = form.cleaned_data['date']
+                task = form.cleaned_data['task'].strip()
                 if task:
                     Homework.objects.update_or_create(
                         schedule=current_schedule,
@@ -123,10 +126,10 @@ def journal_view(request, slug):
                     )
                 else:
                     Homework.objects.filter(schedule=current_schedule, date=date_str).delete()
-
+            else:
+                messages.error(request, "Invalid homework data.")
         return redirect('journal_detail', slug=slug)
 
-  
     students = User.objects.filter(group=current_schedule.group, role='STUDENT').order_by('last_name', 'first_name')
     today = datetime.date.today()
     dates = [today - datetime.timedelta(days=i) for i in range(6, -1, -1)]
