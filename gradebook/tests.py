@@ -42,8 +42,8 @@ class TestGradeAPI:
         response = client.get("/api/v1/grades/")
 
         assert response.status_code == 200
-        assert len(response.data) == 1
-        assert response.data[0]["student"] == student1.id
+        assert response.data["count"] == 1
+        assert response.data["results"][0]["student"] == student1.id
 
     def test_student_cannot_create_grade(self):
         subject = Subject.objects.create(name="Физика")
