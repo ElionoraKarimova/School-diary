@@ -44,3 +44,22 @@ class TestGradeAPI:
         assert response.status_code == 200
         assert len(response.data) == 1
         assert response.data[0]["student"] == student1.id
+
+    def test_student_cannot_create_grade(self):
+        subject = Subject.objects.create(name="Физика")
+        student = User.objects.create_user(
+            username="student3", password="testpass123", role=User.Role.STUDENT
+        )
+
+        client = APIClient()
+        client.force_authenticate(user=student)
+
+        response = client.post("/api/v1/grades/", {
+            "student": student.id,
+            "subject": subject.id,
+            "value": 9,
+            "date": "2026-07-29",
+        })
+
+        assert response.status_code == 403
+        assert Grade.objects.count() == 0

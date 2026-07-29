@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from .models import Schedule, Grade, Homework
 from .serializers import ScheduleSerializer, GradeSerializer, HomeworkSerializer
-
+from .permissions import IsTeacherOrReadOnly
 
 class ScheduleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Schedule.objects.all().select_related('group', 'subject', 'teacher')
@@ -12,7 +12,7 @@ class ScheduleViewSet(viewsets.ReadOnlyModelViewSet):
 class GradeViewSet(viewsets.ModelViewSet):
     queryset = Grade.objects.all().select_related('student', 'subject')
     serializer_class = GradeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -24,4 +24,4 @@ class GradeViewSet(viewsets.ModelViewSet):
 class HomeworkViewSet(viewsets.ModelViewSet):
     queryset = Homework.objects.all().select_related('schedule__subject')
     serializer_class = HomeworkSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly]
