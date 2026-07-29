@@ -6,13 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gradebook', '0003_schedule_slug_alter_grade_date'),
+        ("gradebook", "0003_schedule_slug_alter_grade_date"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='schedule',
-            name='slug',
-            field=models.SlugField(blank=True, default='', max_length=150, unique=True, verbose_name='URL-слаг'),
+            model_name="schedule",
+            name="slug",
+            field=models.SlugField(
+                blank=True,
+                default="",
+                max_length=150,
+                unique=True,
+                verbose_name="URL-слаг",
+            ),
         ),
     ]

@@ -1,9 +1,10 @@
 import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
+from gradebook.models import Grade, Subject
 
 User = get_user_model()
-from gradebook.models import Grade, Subject
+
 
 @pytest.mark.django_db
 class TestGradeAPI:
@@ -15,9 +16,7 @@ class TestGradeAPI:
 
     def test_authenticated_teacher_can_access_grades(self):
         teacher = User.objects.create_user(
-            username="teacher1",
-            password="testpass123",
-            role=User.Role.TEACHER
+            username="teacher1", password="testpass123", role=User.Role.TEACHER
         )
         client = APIClient()
         client.force_authenticate(user=teacher)
@@ -54,12 +53,15 @@ class TestGradeAPI:
         client = APIClient()
         client.force_authenticate(user=student)
 
-        response = client.post("/api/v1/grades/", {
-            "student": student.id,
-            "subject": subject.id,
-            "value": 9,
-            "date": "2026-07-29",
-        })
+        response = client.post(
+            "/api/v1/grades/",
+            {
+                "student": student.id,
+                "subject": subject.id,
+                "value": 9,
+                "date": "2026-07-29",
+            },
+        )
 
         assert response.status_code == 403
         assert Grade.objects.count() == 0

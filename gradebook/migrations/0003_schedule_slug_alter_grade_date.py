@@ -7,18 +7,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gradebook', '0002_alter_group_name_schedule_homework'),
+        ("gradebook", "0002_alter_group_name_schedule_homework"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='schedule',
-            name='slug',
-            field=models.SlugField(blank=True, max_length=150, null=True, verbose_name='URL-слаг'),
+            model_name="schedule",
+            name="slug",
+            field=models.SlugField(
+                blank=True, max_length=150, null=True, verbose_name="URL-слаг"
+            ),
         ),
         migrations.AlterField(
-            model_name='grade',
-            name='date',
-            field=models.DateField(default=datetime.date.today, verbose_name='Дата выставления'),
+            model_name="grade",
+            name="date",
+            field=models.DateField(
+                default=datetime.date.today, verbose_name="Дата выставления"
+            ),
         ),
     ]

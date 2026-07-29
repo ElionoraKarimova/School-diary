@@ -6,10 +6,39 @@ import datetime
 
 def russian_to_slug(text):
     translit = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
-        'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
-        'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts',
-        'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+        "а": "a",
+        "б": "b",
+        "в": "v",
+        "г": "g",
+        "д": "d",
+        "е": "e",
+        "ё": "yo",
+        "ж": "zh",
+        "з": "z",
+        "и": "i",
+        "й": "y",
+        "к": "k",
+        "л": "l",
+        "м": "m",
+        "н": "n",
+        "о": "o",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "у": "u",
+        "ф": "f",
+        "х": "h",
+        "ц": "ts",
+        "ч": "ch",
+        "ш": "sh",
+        "щ": "sch",
+        "ъ": "",
+        "ы": "y",
+        "ь": "",
+        "э": "e",
+        "ю": "yu",
+        "я": "ya",
     }
     res = []
     for char in text.lower():
@@ -18,7 +47,7 @@ def russian_to_slug(text):
         elif char.isalnum():
             res.append(char)
         else:
-            res.append('-')
+            res.append("-")
     return slugify("".join(res))
 
 
@@ -50,31 +79,32 @@ class Grade(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="grades",
-        limit_choices_to={'role': 'STUDENT'},
-        verbose_name="Ученик"
+        limit_choices_to={"role": "STUDENT"},
+        verbose_name="Ученик",
     )
     subject = models.ForeignKey(
-        Subject,
-        on_delete=models.CASCADE,
-        related_name="grades",
-        verbose_name="Предмет"
+        Subject, on_delete=models.CASCADE, related_name="grades", verbose_name="Предмет"
     )
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="given_grades",
-        limit_choices_to={'role': 'TEACHER'},
-        verbose_name="Учитель"
+        limit_choices_to={"role": "TEACHER"},
+        verbose_name="Учитель",
     )
     value = models.PositiveSmallIntegerField(verbose_name="Grade")
-    date = models.DateField(default=datetime.date.today, verbose_name="Дата выставления")
-    comment = models.CharField(max_length=255, blank=True, null=True, verbose_name="Комментарий")
+    date = models.DateField(
+        default=datetime.date.today, verbose_name="Дата выставления"
+    )
+    comment = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Комментарий"
+    )
 
     class Meta:
         verbose_name = "Grade"
         verbose_name_plural = "Grades"
-        ordering = ['-date']
+        ordering = ["-date"]
 
     def __str__(self):
         return f"{self.student.username} - {self.subject.name}: {self.value}"
@@ -82,33 +112,42 @@ class Grade(models.Model):
 
 class Schedule(models.Model):
     WEEKDAYS = (
-        (1, 'Monday'),
-        (2, 'Tuesday'),
-        (3, 'Tuesday'),
-        (4, 'Thursday'),
-        (5, 'Friday'),
-        (6, 'Saturday'),
+        (1, "Monday"),
+        (2, "Tuesday"),
+        (3, "Tuesday"),
+        (4, "Thursday"),
+        (5, "Friday"),
+        (6, "Saturday"),
     )
 
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='schedules', verbose_name="Класс")
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, verbose_name="Предмет")
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, related_name="schedules", verbose_name="Класс"
+    )
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, verbose_name="Предмет"
+    )
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        limit_choices_to={'role': 'TEACHER'},
+        limit_choices_to={"role": "TEACHER"},
         related_name="teacher_schedules",
-        verbose_name="Учитель"
+        verbose_name="Учитель",
     )
 
     weekday = models.IntegerField(choices=WEEKDAYS, verbose_name="День недели")
     lesson_number = models.PositiveIntegerField(verbose_name="Номер урока")
-    classroom = models.CharField(max_length=10, blank=True, null=True, verbose_name="Кабинет")
-    slug = models.SlugField(max_length=150, unique=True, blank=True, default='', verbose_name="URL-слаг")
+    classroom = models.CharField(
+        max_length=10, blank=True, null=True, verbose_name="Кабинет"
+    )
+    slug = models.SlugField(
+        max_length=150, unique=True, blank=True, default="", verbose_name="URL-слаг"
+    )
+
     class Meta:
         verbose_name = "Расписание"
         verbose_name_plural = "Расписание"
-        unique_together = ('group', 'weekday', 'lesson_number')
+        unique_together = ("group", "weekday", "lesson_number")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -133,8 +172,8 @@ class Homework(models.Model):
     schedule = models.ForeignKey(
         Schedule,
         on_delete=models.CASCADE,
-        related_name='homeworks',
-        verbose_name="Урок в расписании"
+        related_name="homeworks",
+        verbose_name="Урок в расписании",
     )
     date = models.DateField(verbose_name="Дата, на которую задано")
     task = models.TextField(verbose_name="Задание")

@@ -8,6 +8,6 @@ from .models import User
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
-        ('Дополнительно', {'fields': ('role', 'group')}),
+        ("Дополнительно", {"fields": ("role", "group")}),
     )
-    list_display = ['username', 'email', 'role', 'group', 'is_staff']
+    list_display = ["username", "email", "role", "group", "is_staff"]

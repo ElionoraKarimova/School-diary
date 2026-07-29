@@ -14,22 +14,30 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from gradebook.views import home_view, journal_view
 from rest_framework.routers import DefaultRouter
 from gradebook.api_views import ScheduleViewSet, GradeViewSet, HomeworkViewSet
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = DefaultRouter()
-router.register(r'schedules', ScheduleViewSet, basename='api-schedules')
-router.register(r'grades', GradeViewSet, basename='api-grades')
-router.register(r'homeworks', HomeworkViewSet, basename='api-homeworks')
+router.register(r"schedules", ScheduleViewSet, basename="api-schedules")
+router.register(r"grades", GradeViewSet, basename="api-grades")
+router.register(r"homeworks", HomeworkViewSet, basename="api-homeworks")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('django.contrib.auth.urls')),
-    path('', home_view, name='home'),
-    path('journal/<slug:slug>/', journal_view, name='journal_detail'),
-    path('api/v1/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),
+    path("admin/", admin.site.urls),
+    path("", include("django.contrib.auth.urls")),
+    path("", home_view, name="home"),
+    path("journal/<slug:slug>/", journal_view, name="journal_detail"),
+    path("api/v1/", include(router.urls)),
+    path("api-auth/", include("rest_framework.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
 ]
