@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Дневник{% endblock %}
+{% block title %}Diary{% endblock %}
 
 {% block content %}
 <style>
@@ -80,22 +80,22 @@
     .col-grade { width: 80px; text-align: center; font-weight: bold; font-size: 16px; color: #2b6cb0; }
 </style>
 
-<h2>Здравствуйте, {{ user.get_full_name|default:user.username }}!</h2>
+<h2>Hello, {{ user.get_full_name|default:user.username }}!</h2>
 
 {% if user.role == 'TEACHER' %}
-    <h3>Ваше расписание на неделю</h3>
-    <p><small>Выберите предмет, чтобы открыть журнал на отдельной странице.</small></p>
+    <h3>Your weekly schedule</h3>
+    <p><small>Select a subject to open its gradebook on a separate page.</small></p>
     <div class="schedule-grid">
         {% for day_name, lessons in schedule_by_day.items %}
             <div class="day-card">
                 <div class="day-title">{{ day_name }}</div>
                 {% for lesson in lessons %}
                     <a href="{% url 'journal_detail' lesson.slug %}" class="lesson-item">
-                        <strong>№{{ lesson.lesson_number }} {{ lesson.subject.name }}</strong><br>
-                        <small>Класс: {{ lesson.group.name }}</small>
+                        <strong>#{{ lesson.lesson_number }} {{ lesson.subject.name }}</strong><br>
+                        <small>Class: {{ lesson.group.name }}</small>
                     </a>
                 {% empty %}
-                    <small style="color: #a0aec0;">Нет уроков</small>
+                    <small style="color: #a0aec0;">No lessons</small>
                 {% endfor %}
             </div>
         {% endfor %}
@@ -103,7 +103,7 @@
 
 {% else %}
     <div class="diary-container">
-        <h3>Электронный дневник</h3>
+        <h3>Diary</h3>
 
         {% for day in diary_by_day %}
             <div class="day-block">
@@ -113,10 +113,10 @@
                 <table class="diary-table">
                     <thead>
                         <tr>
-                            <th class="col-num">№</th>
-                            <th class="col-subject">Предмет</th>
-                            <th class="col-hw">Домашнее задание</th>
-                            <th class="col-grade">Оценка</th>
+                            <th class="col-num">#</th>
+                            <th class="col-subject">Subject</th>
+                            <th class="col-hw">Homework</th>
+                            <th class="col-grade">Grade</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,7 +144,7 @@
                 </table>
             </div>
         {% empty %}
-            <p>Расписание для вашего класса пока не заполнено.</p>
+            <p>The schedule for your class hasn't been filled in yet.</p>
         {% endfor %}
     </div>
 {% endif %}

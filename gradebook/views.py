@@ -20,17 +20,17 @@ def home_view(request):
             .order_by("weekday", "lesson_number")
         )
         weekdays = {
-            1: "Понедельник",
-            2: "Вторник",
-            3: "Среда",
-            4: "Четверг",
-            5: "Пятница",
-            6: "Суббота",
+            1: "Monday",
+            2: "Tuesday",
+            3: "Wednesday",
+            4: "Thursday",
+            5: "Friday",
+            6: "Saturday",
         }
         schedule_by_day = {day_name: [] for day_name in weekdays.values()}
 
         for item in schedule:
-            day_name = weekdays.get(item.weekday, "Другой день")
+            day_name = weekdays.get(item.weekday, "Other day")
             schedule_by_day[day_name].append(item)
 
         context["schedule_by_day"] = schedule_by_day
@@ -38,12 +38,12 @@ def home_view(request):
     elif user.role == "STUDENT":
         if user.group:
             weekdays = {
-                1: "ПОНЕДЕЛЬНИК",
-                2: "ВТОРНИК",
-                3: "СРЕДА",
-                4: "ЧЕТВЕРГ",
-                5: "ПЯТНИЦА",
-                6: "СУББОТА",
+                1: "MONDAY",
+                2: "TUESDAY",
+                3: "WEDNESDAY",
+                4: "THURSDAY",
+                5: "FRIDAY",
+                6: "SATURDAY",
             }
 
             today = datetime.date.today()

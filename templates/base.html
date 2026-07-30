@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Электронный дневник{% endblock %}</title>
+    <title>{% block title %}School Diary{% endblock %}</title>
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 20px; background-color: #f7fafc; color: #2d3748; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -14,11 +14,11 @@
 <body>
     <div class="container">
         <nav>
-            <a href="/"> Электронный дневник</a>
+            <a href="/"> School Diary</a>
             {% if user.is_authenticated %}
-                <span>{{ user.username }} | <a href="/logout/">Выйти</a></span>
+                <span>{{ user.username }} | <a href="/logout/">Log out</a></span>
             {% else %}
-                <a href="/login/">Войти</a>
+                <a href="/login/">Log in</a>
             {% endif %}
         </nav>
 {% if messages %}
