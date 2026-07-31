@@ -65,3 +65,28 @@ class TestGradeAPI:
 
         assert response.status_code == 403
         assert Grade.objects.count() == 0
+
+    def test_teacher_cannot_edit_another_teachers_grade(self):
+        subject = Subject.objects.create(name="Chemistry")
+        student = User.objects.create_user(
+            username="student4", password="testpass123", role=User.Role.STUDENT
+        )
+        teacher_a = User.objects.create_user(
+            username="teacher_a", password="testpass123", role=User.Role.TEACHER
+        )
+        teacher_b = User.objects.create_user(
+            username="teacher_b", password="testpass123", role=User.Role.TEACHER
+        )
+
+        grade = Grade.objects.create(
+            student=student, subject=subject, teacher=teacher_a, value=8
+        )
+
+        client = APIClient()
+        client.force_authenticate(user=teacher_b)
+
+        response = client.patch(f"/api/v1/grades/{grade.id}/", {"value": 2})
+
+        assert response.status_code == 403
+        grade.refresh_from_db()
+        assert grade.value == 8
