@@ -5,7 +5,8 @@ from .models import Schedule, Grade, Homework
 from users.models import User
 import datetime
 from django.contrib import messages
-
+import logging
+logger = logging.getLogger("gradebook")
 
 @login_required
 def home_view(request):
@@ -122,13 +123,33 @@ def journal_view(request, slug):
                         date=date_str,
                         defaults={"value": val, "teacher": user},
                     )
+                    logger.info(
+                        "Teacher %s set grade %s for student %s (subject: %s, date: %s)",
+                        user.username,
+                        val,
+                        student_id,
+                        current_schedule.subject,
+                        date_str,
+                    )
                 else:
                     Grade.objects.filter(
                         student_id=student_id,
                         subject=current_schedule.subject,
                         date=date_str,
                     ).delete()
+                    logger.info(
+                        "Teacher %s deleted grade for student %s (subject: %s, date: %s)",
+                        user.username,
+                        student_id,
+                        current_schedule.subject,
+                        date_str,
+                    )
             else:
+                logger.warning(
+                    "Teacher %s submitted invalid grade data: %s",
+                    user.username,
+                    request.POST.get("value"),
+                )
                 messages.error(request, "Grade must be a number between 0 and 10.")
 
         elif "save_homework" in request.POST:
