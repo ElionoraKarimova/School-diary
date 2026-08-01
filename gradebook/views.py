@@ -139,6 +139,28 @@ def admin_dashboard_view(request):
                 return redirect("admin_dashboard")
             student_form = AddStudentForm()
 
+        elif "delete_student" in request.POST:
+            student_id = request.POST.get("delete_student")
+            deleted_user = get_object_or_404(
+                User, id=student_id, role=User.Role.STUDENT
+            )
+            logger.info(
+                "Admin %s deleted student: %s", user.username, deleted_user.username
+            )
+            deleted_user.delete()
+            messages.success(request, "Student deleted successfully.")
+            return redirect("admin_dashboard")
+
+        elif "delete_schedule" in request.POST:
+            schedule_id = request.POST.get("delete_schedule")
+            schedule_entry = get_object_or_404(Schedule, id=schedule_id)
+            logger.info(
+                "Admin %s deleted schedule entry: %s", user.username, schedule_entry
+            )
+            schedule_entry.delete()
+            messages.success(request, "Schedule entry deleted successfully.")
+            return redirect("admin_dashboard")
+
         else:
             student_form = AddStudentForm()
             schedule_form = ScheduleForm()
@@ -146,10 +168,21 @@ def admin_dashboard_view(request):
         student_form = AddStudentForm()
         schedule_form = ScheduleForm()
 
+    students = User.objects.filter(role=User.Role.STUDENT).order_by(
+        "last_name", "first_name"
+    )
+    schedules = Schedule.objects.all().select_related("group", "subject", "teacher")
+
     return render(
         request,
         "gradebook/admin_dashboard.html",
-        {"user": user, "form": student_form, "schedule_form": schedule_form},
+        {
+            "user": user,
+            "form": student_form,
+            "schedule_form": schedule_form,
+            "students": students,
+            "schedules": schedules,
+        },
     )
 
 @login_required
