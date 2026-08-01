@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from gradebook.views import home_view, journal_view
+from gradebook.views import home_view, journal_view,admin_dashboard_view
 from rest_framework.routers import DefaultRouter
 from gradebook.api_views import ScheduleViewSet, GradeViewSet, HomeworkViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -32,6 +32,7 @@ urlpatterns = [
     path("", include("django.contrib.auth.urls")),
     path("", home_view, name="home"),
     path("journal/<slug:slug>/", journal_view, name="journal_detail"),
+    path("admin-panel/", admin_dashboard_view, name="admin_dashboard"),
     path("api/v1/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

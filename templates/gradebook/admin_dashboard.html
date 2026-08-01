@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<h2>Admin Panel</h2>
+<p>Hello, {{ user.get_full_name|default:user.username }}!</p>
+
+<div style="margin-top: 20px;">
+    <p><em>Actions will appear here.</em></p>
+</div>
+{% endblock %}
