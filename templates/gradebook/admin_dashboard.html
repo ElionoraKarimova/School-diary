@@ -10,8 +10,19 @@
     <h3>Add a new student</h3>
     <form method="POST">
         {% csrf_token %}
+        <input type="hidden" name="add_student" value="1">
         {{ form.as_p }}
         <button type="submit">Add Student</button>
+    </form>
+</div>
+
+<div style="margin-top: 40px; max-width: 400px;">
+    <h3>Add a schedule entry</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="add_schedule" value="1">
+        {{ schedule_form.as_p }}
+        <button type="submit">Add Schedule Entry</button>
     </form>
 </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-from .forms import GradeForm, HomeworkForm
+from .forms import GradeForm, HomeworkForm, ScheduleForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Schedule, Grade, Homework
@@ -106,28 +106,50 @@ def admin_dashboard_view(request):
         return redirect("home")
 
     if request.method == "POST":
-        form = AddStudentForm(request.POST)
-        if form.is_valid():
-            User.objects.create_user(
-                username=form.cleaned_data["username"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                password=form.cleaned_data["password"],
-                role=User.Role.STUDENT,
-                group=form.cleaned_data["group"],
-            )
-            logger.info(
-                "Admin %s added new student: %s",
-                user.username,
-                form.cleaned_data["username"],
-            )
-            messages.success(request, "Student added successfully.")
-            return redirect("admin_dashboard")
+        if "add_student" in request.POST:
+            student_form = AddStudentForm(request.POST)
+            if student_form.is_valid():
+                User.objects.create_user(
+                    username=student_form.cleaned_data["username"],
+                    first_name=student_form.cleaned_data["first_name"],
+                    last_name=student_form.cleaned_data["last_name"],
+                    password=student_form.cleaned_data["password"],
+                    role=User.Role.STUDENT,
+                    group=student_form.cleaned_data["group"],
+                )
+                logger.info(
+                    "Admin %s added new student: %s",
+                    user.username,
+                    student_form.cleaned_data["username"],
+                )
+                messages.success(request, "Student added successfully.")
+                return redirect("admin_dashboard")
+            schedule_form = ScheduleForm()
+
+        elif "add_schedule" in request.POST:
+            schedule_form = ScheduleForm(request.POST)
+            if schedule_form.is_valid():
+                schedule_form.save()
+                logger.info(
+                    "Admin %s added a new schedule entry: %s",
+                    user.username,
+                    schedule_form.cleaned_data,
+                )
+                messages.success(request, "Schedule entry added successfully.")
+                return redirect("admin_dashboard")
+            student_form = AddStudentForm()
+
+        else:
+            student_form = AddStudentForm()
+            schedule_form = ScheduleForm()
     else:
-        form = AddStudentForm()
+        student_form = AddStudentForm()
+        schedule_form = ScheduleForm()
 
     return render(
-        request, "gradebook/admin_dashboard.html", {"user": user, "form": form}
+        request,
+        "gradebook/admin_dashboard.html",
+        {"user": user, "form": student_form, "schedule_form": schedule_form},
     )
 
 @login_required
