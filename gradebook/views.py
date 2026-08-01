@@ -6,6 +6,7 @@ from users.models import User
 import datetime
 from django.contrib import messages
 import logging
+from users.forms import AddStudentForm
 logger = logging.getLogger("gradebook")
 
 @login_required
@@ -104,7 +105,30 @@ def admin_dashboard_view(request):
     if user.role != "ADMIN":
         return redirect("home")
 
-    return render(request, "gradebook/admin_dashboard.html", {"user": user})
+    if request.method == "POST":
+        form = AddStudentForm(request.POST)
+        if form.is_valid():
+            User.objects.create_user(
+                username=form.cleaned_data["username"],
+                first_name=form.cleaned_data["first_name"],
+                last_name=form.cleaned_data["last_name"],
+                password=form.cleaned_data["password"],
+                role=User.Role.STUDENT,
+                group=form.cleaned_data["group"],
+            )
+            logger.info(
+                "Admin %s added new student: %s",
+                user.username,
+                form.cleaned_data["username"],
+            )
+            messages.success(request, "Student added successfully.")
+            return redirect("admin_dashboard")
+    else:
+        form = AddStudentForm()
+
+    return render(
+        request, "gradebook/admin_dashboard.html", {"user": user, "form": form}
+    )
 
 @login_required
 def journal_view(request, slug):
