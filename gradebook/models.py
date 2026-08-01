@@ -52,23 +52,23 @@ def russian_to_slug(text):
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=50, verbose_name="Название класса")
-    year = models.PositiveIntegerField(verbose_name="Учебный год")
+    name = models.CharField(max_length=50, verbose_name="Class name")
+    year = models.PositiveIntegerField(verbose_name="Academic year")
 
     class Meta:
-        verbose_name = "Класс"
-        verbose_name_plural = "Классы"
+        verbose_name = "Class"
+        verbose_name_plural = "Classes"
 
     def __str__(self):
         return f"{self.name} ({self.year})"
 
 
 class Subject(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Название предмета")
+    name = models.CharField(max_length=100, verbose_name="Subject name")
 
     class Meta:
-        verbose_name = "Предмет"
-        verbose_name_plural = "Предметы"
+        verbose_name = "Subject"
+        verbose_name_plural = "Subjects"
 
     def __str__(self):
         return self.name
@@ -80,10 +80,10 @@ class Grade(models.Model):
         on_delete=models.CASCADE,
         related_name="grades",
         limit_choices_to={"role": "STUDENT"},
-        verbose_name="Ученик",
+        verbose_name="Student",
     )
     subject = models.ForeignKey(
-        Subject, on_delete=models.CASCADE, related_name="grades", verbose_name="Предмет"
+        Subject, on_delete=models.CASCADE, related_name="grades", verbose_name="Subject"
     )
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -91,14 +91,14 @@ class Grade(models.Model):
         null=True,
         related_name="given_grades",
         limit_choices_to={"role": "TEACHER"},
-        verbose_name="Учитель",
+        verbose_name="Teacher",
     )
     value = models.PositiveSmallIntegerField(verbose_name="Grade")
     date = models.DateField(
-        default=datetime.date.today, verbose_name="Дата выставления"
+        default=datetime.date.today, verbose_name="Date given"
     )
     comment = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="Комментарий"
+        max_length=255, blank=True, null=True, verbose_name="Comment"
     )
 
     class Meta:
@@ -114,17 +114,17 @@ class Schedule(models.Model):
     WEEKDAYS = (
         (1, "Monday"),
         (2, "Tuesday"),
-        (3, "Tuesday"),
+        (3, "Wednesday"),
         (4, "Thursday"),
         (5, "Friday"),
         (6, "Saturday"),
     )
 
     group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name="schedules", verbose_name="Класс"
+        Group, on_delete=models.CASCADE, related_name="schedules", verbose_name="Class"
     )
     subject = models.ForeignKey(
-        Subject, on_delete=models.CASCADE, verbose_name="Предмет"
+        Subject, on_delete=models.CASCADE, verbose_name="Subject"
     )
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -132,21 +132,21 @@ class Schedule(models.Model):
         null=True,
         limit_choices_to={"role": "TEACHER"},
         related_name="teacher_schedules",
-        verbose_name="Учитель",
+        verbose_name="Teacher",
     )
 
-    weekday = models.IntegerField(choices=WEEKDAYS, verbose_name="День недели")
-    lesson_number = models.PositiveIntegerField(verbose_name="Номер урока")
+    weekday = models.IntegerField(choices=WEEKDAYS, verbose_name="Weekday")
+    lesson_number = models.PositiveIntegerField(verbose_name="Lesson number")
     classroom = models.CharField(
-        max_length=10, blank=True, null=True, verbose_name="Кабинет"
+        max_length=10, blank=True, null=True, verbose_name="Classroom"
     )
     slug = models.SlugField(
-        max_length=150, unique=True, blank=True, default="", verbose_name="URL-слаг"
+        max_length=150, unique=True, blank=True, default="", verbose_name="URL slug"
     )
 
     class Meta:
-        verbose_name = "Расписание"
-        verbose_name_plural = "Расписание"
+        verbose_name = "Schedule"
+        verbose_name_plural = "Schedule"
         unique_together = ("group", "weekday", "lesson_number")
 
     def save(self, *args, **kwargs):
@@ -165,7 +165,7 @@ class Schedule(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.get_weekday_display()} | Урок №{self.lesson_number} | {self.group} - {self.subject}"
+        return f"{self.get_weekday_display()} | Lesson #{self.lesson_number} | {self.group} - {self.subject}"
 
 
 class Homework(models.Model):
@@ -173,15 +173,15 @@ class Homework(models.Model):
         Schedule,
         on_delete=models.CASCADE,
         related_name="homeworks",
-        verbose_name="Урок в расписании",
+        verbose_name="Scheduled lesson",
     )
-    date = models.DateField(verbose_name="Дата, на которую задано")
-    task = models.TextField(verbose_name="Задание")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    date = models.DateField(verbose_name="Assigned date")
+    task = models.TextField(verbose_name="Task")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
 
     class Meta:
-        verbose_name = "Домашнее задание"
-        verbose_name_plural = "Домашние задания"
+        verbose_name = "Homework"
+        verbose_name_plural = "Homework"
 
     def __str__(self):
-        return f"ДЗ на {self.date} по {self.schedule.subject.name} для {self.schedule.group.name}"
+        return f"Homework for {self.date} on {self.schedule.subject.name} for {self.schedule.group.name}" 

@@ -5,17 +5,17 @@ from gradebook.models import Group
 
 class User(AbstractUser):
     class Role(models.TextChoices):
-        ADMIN = "ADMIN", "Администратор"
-        TEACHER = "TEACHER", "Учитель"
-        STUDENT = "STUDENT", "Ученик"
-        PARENT = "PARENT", "Родитель"
+        ADMIN = "ADMIN", "Admin"
+        TEACHER = "TEACHER", "Teacher"
+        STUDENT = "STUDENT", "Student"
+        PARENT = "PARENT", "Parent"
 
     role = models.CharField(
-        max_length=20, choices=Role.choices, default=Role.STUDENT, verbose_name="Роль"
+        max_length=20, choices=Role.choices, default=Role.STUDENT, verbose_name="Role"
     )
 
     phone = models.CharField(
-        max_length=20, blank=True, null=True, verbose_name="Телефон"
+        max_length=20, blank=True, null=True, verbose_name="Phone"
     )
 
     group = models.ForeignKey(
@@ -24,12 +24,12 @@ class User(AbstractUser):
         null=True,
         blank=True,
         related_name="students",
-        verbose_name="Класс",
+        verbose_name="Class",
     )
 
     class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
