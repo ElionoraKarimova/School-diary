@@ -3,37 +3,125 @@
 {% block title %}Admin Panel{% endblock %}
 
 {% block content %}
-<h2>Admin Panel</h2>
-<p>Hello, {{ user.get_full_name|default:user.username }}!</p>
+<style>
+    .admin-header {
+        margin-bottom: 20px;
+    }
+    .admin-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        max-width: 450px;
+    }
+    .admin-card h3 {
+        margin-top: 0;
+        color: #1A365D;
+    }
+    .admin-card p {
+        margin: 12px 0;
+    }
+    .admin-card label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
+        color: #2d3748;
+    }
+    .admin-card input,
+    .admin-card select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+    .admin-btn {
+        margin-top: 10px;
+        padding: 8px 18px;
+        background: #3182ce;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .admin-btn:hover {
+        background: #2b6cb0;
+    }
+    .admin-table-wrapper {
+        margin-bottom: 30px;
+    }
+    .admin-table-wrapper h3 {
+        color: #1A365D;
+    }
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .admin-table th, .admin-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+    .admin-table th {
+        background-color: #1A365D;
+        color: white;
+        font-weight: 500;
+    }
+    .admin-table tr:last-child td {
+        border-bottom: none;
+    }
+    .delete-btn {
+        padding: 5px 12px;
+        background: #e53e3e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .delete-btn:hover {
+        background: #c53030;
+    }
+</style>
 
-<div style="margin-top: 20px; max-width: 400px;">
+<div class="admin-header">
+    <h2>Admin Panel</h2>
+    <p>Hello, {{ user.get_full_name|default:user.username }}!</p>
+</div>
+
+<div class="admin-card">
     <h3>Add a new student</h3>
     <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="add_student" value="1">
         {{ form.as_p }}
-        <button type="submit">Add Student</button>
+        <button type="submit" class="admin-btn">Add Student</button>
     </form>
 </div>
 
-<div style="margin-top: 40px; max-width: 400px;">
+<div class="admin-card">
     <h3>Add a schedule entry</h3>
     <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="add_schedule" value="1">
         {{ schedule_form.as_p }}
-        <button type="submit">Add Schedule Entry</button>
+        <button type="submit" class="admin-btn">Add Schedule Entry</button>
     </form>
 </div>
 
-<div style="margin-top: 40px;">
+<div class="admin-table-wrapper">
     <h3>Students</h3>
-    <table style="width: 100%; border-collapse: collapse;">
+    <table class="admin-table">
         <tr>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Username</th>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Full Name</th>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Group</th>
-            <th style="border-bottom: 1px solid #cbd5e0;"></th>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Group</th>
+            <th></th>
         </tr>
         {% for student in students %}
         <tr>
@@ -43,7 +131,7 @@
             <td>
                 <form method="POST" style="margin: 0;" onsubmit="return confirm('Delete this student?');">
                     {% csrf_token %}
-                    <button type="submit" name="delete_student" value="{{ student.id }}">Delete</button>
+                    <button type="submit" name="delete_student" value="{{ student.id }}" class="delete-btn">Delete</button>
                 </form>
             </td>
         </tr>
@@ -53,15 +141,15 @@
     </table>
 </div>
 
-<div style="margin-top: 40px;">
+<div class="admin-table-wrapper">
     <h3>Schedule</h3>
-    <table style="width: 100%; border-collapse: collapse;">
+    <table class="admin-table">
         <tr>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Group</th>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Subject</th>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Teacher</th>
-            <th style="text-align: left; border-bottom: 1px solid #cbd5e0;">Day / #</th>
-            <th style="border-bottom: 1px solid #cbd5e0;"></th>
+            <th>Group</th>
+            <th>Subject</th>
+            <th>Teacher</th>
+            <th>Day / #</th>
+            <th></th>
         </tr>
         {% for schedule in schedules %}
         <tr>
@@ -72,7 +160,7 @@
             <td>
                 <form method="POST" style="margin: 0;" onsubmit="return confirm('Delete this schedule entry?');">
                     {% csrf_token %}
-                    <button type="submit" name="delete_schedule" value="{{ schedule.id }}">Delete</button>
+                    <button type="submit" name="delete_schedule" value="{{ schedule.id }}" class="delete-btn">Delete</button>
                 </form>
             </td>
         </tr>

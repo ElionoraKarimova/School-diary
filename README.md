@@ -6,10 +6,13 @@ The project is fully containerized with Docker and exposes both a web UI and a R
 
 ## Features
 
+
 - Role-based access control (Teacher, Student, Admin, Parent)
 - Grade tracking on a 0–10 scale
 - Homework assignment tracking per lesson
+- Admin dashboard for managing students and the class schedule (add/delete)
 - REST API with pagination, filtering and role-based write permissions
+- Object-level permissions (a teacher can only edit their own grades/homework)
 - Interactive API documentation (Swagger UI)
 - Automated tests (pytest) and CI (GitHub Actions)
 
@@ -43,6 +46,10 @@ The project is fully containerized with Docker and exposes both a web UI and a R
 4. The app will be available at `http://localhost:8000`
 
 5. Interactive API documentation (Swagger): `http://localhost:8000/api/docs/`
+
+6. To access the admin dashboard, create a user with the `ADMIN` role via Django admin (`http://localhost:8000/admin/`), then log in and visit `http://localhost:8000/admin-panel/`
+
+7. Teachers and students log in at `http://localhost:8000/login/`. You can create teacher/student accounts via Django admin (`http://localhost:8000/admin/`), setting the `role` field accordingly.
 
 ## Running tests
 
