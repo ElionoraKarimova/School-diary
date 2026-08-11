@@ -105,7 +105,10 @@ class Grade(models.Model):
         verbose_name = "Grade"
         verbose_name_plural = "Grades"
         ordering = ["-date"]
-
+        indexes = [
+            models.Index(fields=["student", "-date"], name="grade_student_date_idx"),
+            models.Index(fields=["subject", "-date"], name="grade_subject_date_idx"),
+        ]
     def __str__(self):
         return f"{self.student.username} - {self.subject.name}: {self.value}"
 
@@ -148,6 +151,9 @@ class Schedule(models.Model):
         verbose_name = "Schedule"
         verbose_name_plural = "Schedule"
         unique_together = ("group", "weekday", "lesson_number")
+        indexes = [
+            models.Index(fields=["group", "weekday"], name="sched_group_weekday_idx"),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -182,6 +188,8 @@ class Homework(models.Model):
     class Meta:
         verbose_name = "Homework"
         verbose_name_plural = "Homework"
-
+        indexes = [
+            models.Index(fields=["schedule", "-date"], name="hw_schedule_date_idx"),
+        ]
     def __str__(self):
         return f"Homework for {self.date} on {self.schedule.subject.name} for {self.schedule.group.name}" 

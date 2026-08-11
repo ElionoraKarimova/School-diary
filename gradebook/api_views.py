@@ -1,4 +1,7 @@
+from django.db.models import Avg, Count
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import Schedule, Grade, Homework
 from .serializers import ScheduleSerializer, GradeSerializer, HomeworkSerializer
 from .permissions import IsTeacherOrReadOnly
@@ -27,6 +30,24 @@ class GradeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
 
+    @action(detail=False, methods=["get"], url_path="averages")
+    def averages(self, request):
+        rows = (
+            self.get_queryset()
+            .values("subject_id", "subject__name")
+            .annotate(average=Avg("value"), grades_count=Count("id"))
+            .order_by("subject__name")
+        )
+        data = [
+            {
+                "subject_id": row["subject_id"],
+                "subject_name": row["subject__name"],
+                "average": round(row["average"], 2) if row["average"] else None,
+                "grades_count": row["grades_count"],
+            }
+            for row in rows
+        ]
+        return Response(data)
 
 class HomeworkViewSet(viewsets.ModelViewSet):
     queryset = Homework.objects.all().select_related("schedule__subject")
