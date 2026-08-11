@@ -6,6 +6,7 @@ from .models import Schedule, Grade, Homework
 from .serializers import ScheduleSerializer, GradeSerializer, HomeworkSerializer
 from .permissions import IsTeacherOrReadOnly
 from .sql import student_average_via_plpgsql
+from .tasks import notify_grade_created
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -28,8 +29,10 @@ class GradeViewSet(viewsets.ModelViewSet):
         if getattr(user, "role", None) == "STUDENT":
             return qs.filter(student=user)
         return qs
+
     def perform_create(self, serializer):
-        serializer.save(teacher=self.request.user)
+        grade = serializer.save(teacher=self.request.user)
+        notify_grade_created.delay(grade.id)
 
     @action(detail=False, methods=["get"], url_path="averages")
     def averages(self, request):
