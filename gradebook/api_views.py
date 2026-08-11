@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import Schedule, Grade, Homework
 from .serializers import ScheduleSerializer, GradeSerializer, HomeworkSerializer
 from .permissions import IsTeacherOrReadOnly
+from .sql import student_average_via_plpgsql
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -48,6 +49,12 @@ class GradeViewSet(viewsets.ModelViewSet):
             for row in rows
         ]
         return Response(data)
+
+    @action(detail=False, methods=["get"], url_path="my-average")
+    def my_average(self, request):
+        student_id = request.query_params.get("student_id") or request.user.id
+        average = student_average_via_plpgsql(int(student_id))
+        return Response({"student_id": int(student_id), "average": average})
 
 class HomeworkViewSet(viewsets.ModelViewSet):
     queryset = Homework.objects.all().select_related("schedule__subject")
