@@ -19,10 +19,13 @@ class GradeViewSet(viewsets.ModelViewSet):
     filterset_fields = ["subject", "student", "date"]
 
     def get_queryset(self):
+        qs = Grade.objects.all().select_related("student", "subject", "teacher")
         user = self.request.user
-        if user.role == "STUDENT":
-            return Grade.objects.filter(student=user)
-        return Grade.objects.all()
+        if getattr(user, "role", None) == "STUDENT":
+            return qs.filter(student=user)
+        return qs
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
 
 
 class HomeworkViewSet(viewsets.ModelViewSet):
