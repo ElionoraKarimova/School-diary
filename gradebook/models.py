@@ -5,50 +5,8 @@ import datetime
 
 
 def russian_to_slug(text):
-    translit = {
-        "а": "a",
-        "б": "b",
-        "в": "v",
-        "г": "g",
-        "д": "d",
-        "е": "e",
-        "ё": "yo",
-        "ж": "zh",
-        "з": "z",
-        "и": "i",
-        "й": "y",
-        "к": "k",
-        "л": "l",
-        "м": "m",
-        "н": "n",
-        "о": "o",
-        "п": "p",
-        "р": "r",
-        "с": "s",
-        "т": "t",
-        "у": "u",
-        "ф": "f",
-        "х": "h",
-        "ц": "ts",
-        "ч": "ch",
-        "ш": "sh",
-        "щ": "sch",
-        "ъ": "",
-        "ы": "y",
-        "ь": "",
-        "э": "e",
-        "ю": "yu",
-        "я": "ya",
-    }
-    res = []
-    for char in text.lower():
-        if char in translit:
-            res.append(translit[char])
-        elif char.isalnum():
-            res.append(char)
-        else:
-            res.append("-")
-    return slugify("".join(res))
+
+    return slugify(text, allow_unicode=False)
 
 
 class Group(models.Model):
