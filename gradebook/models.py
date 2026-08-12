@@ -1,10 +1,11 @@
 from django.conf import settings
+from typing import Any
 from django.db import models
 from django.utils.text import slugify
 import datetime
 
 
-def russian_to_slug(text):
+def russian_to_slug(text: str) -> str:
 
     return slugify(text, allow_unicode=False)
 
@@ -17,7 +18,7 @@ class Group(models.Model):
         verbose_name = "Class"
         verbose_name_plural = "Classes"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.year})"
 
 
@@ -28,7 +29,7 @@ class Subject(models.Model):
         verbose_name = "Subject"
         verbose_name_plural = "Subjects"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -67,7 +68,7 @@ class Grade(models.Model):
             models.Index(fields=["student", "-date"], name="grade_student_date_idx"),
             models.Index(fields=["subject", "-date"], name="grade_subject_date_idx"),
         ]
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.student.username} - {self.subject.name}: {self.value}"
 
 
@@ -113,7 +114,7 @@ class Schedule(models.Model):
             models.Index(fields=["group", "weekday"], name="sched_group_weekday_idx"),
         ]
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.slug:
             raw_text = f"{self.group.name}-{self.subject.name}"
             base_slug = russian_to_slug(raw_text)
@@ -128,7 +129,7 @@ class Schedule(models.Model):
 
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.get_weekday_display()} | Lesson #{self.lesson_number} | {self.group} - {self.subject}"
 
 
@@ -149,5 +150,5 @@ class Homework(models.Model):
         indexes = [
             models.Index(fields=["schedule", "-date"], name="hw_schedule_date_idx"),
         ]
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Homework for {self.date} on {self.schedule.subject.name} for {self.schedule.group.name}" 
