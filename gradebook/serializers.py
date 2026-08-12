@@ -17,6 +17,8 @@ class GroupSerializer(serializers.ModelSerializer):
 class GradeSerializer(serializers.ModelSerializer):
     student_name = serializers.ReadOnlyField(source="student.get_full_name")
     subject_name = serializers.ReadOnlyField(source="subject.name")
+    teacher = serializers.ReadOnlyField(source="teacher.id")
+    teacher_name = serializers.ReadOnlyField(source="teacher.get_full_name")
 
     class Meta:
         model = Grade
@@ -26,10 +28,17 @@ class GradeSerializer(serializers.ModelSerializer):
             "student_name",
             "subject",
             "subject_name",
+            "teacher",
+            "teacher_name",
             "value",
             "date",
             "comment",
         ]
+
+    def validate_value(self, value):
+        if not 1 <= value <= 10:
+            raise serializers.ValidationError("Балл должен быть от 1 до 10.")
+        return value
 
 
 class HomeworkSerializer(serializers.ModelSerializer):

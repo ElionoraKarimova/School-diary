@@ -14,9 +14,7 @@ class User(AbstractUser):
         max_length=20, choices=Role.choices, default=Role.STUDENT, verbose_name="Role"
     )
 
-    phone = models.CharField(
-        max_length=20, blank=True, null=True, verbose_name="Phone"
-    )
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Phone")
 
     group = models.ForeignKey(
         Group,

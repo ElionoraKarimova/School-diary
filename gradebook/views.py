@@ -7,7 +7,9 @@ import datetime
 from django.contrib import messages
 import logging
 from users.forms import AddStudentForm
+
 logger = logging.getLogger("gradebook")
+
 
 @login_required
 def home_view(request):
@@ -99,6 +101,8 @@ def home_view(request):
 
             context["diary_by_day"] = diary_by_day
     return render(request, "gradebook/home.html", context)
+
+
 @login_required
 def admin_dashboard_view(request):
     user = request.user
@@ -184,6 +188,7 @@ def admin_dashboard_view(request):
             "schedules": schedules,
         },
     )
+
 
 @login_required
 def journal_view(request, slug):
