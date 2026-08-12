@@ -34,10 +34,12 @@ class GradeSerializer(serializers.ModelSerializer):
             "date",
             "comment",
         ]
+
     def validate_value(self, value):
         if not 1 <= value <= 10:
             raise serializers.ValidationError("Балл должен быть от 1 до 10.")
         return value
+
 
 class HomeworkSerializer(serializers.ModelSerializer):
     subject_name = serializers.ReadOnlyField(source="schedule.subject.name")

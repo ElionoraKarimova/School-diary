@@ -53,9 +53,7 @@ class Grade(models.Model):
         verbose_name="Teacher",
     )
     value = models.PositiveSmallIntegerField(verbose_name="Grade")
-    date = models.DateField(
-        default=datetime.date.today, verbose_name="Date given"
-    )
+    date = models.DateField(default=datetime.date.today, verbose_name="Date given")
     comment = models.CharField(
         max_length=255, blank=True, null=True, verbose_name="Comment"
     )
@@ -68,6 +66,7 @@ class Grade(models.Model):
             models.Index(fields=["student", "-date"], name="grade_student_date_idx"),
             models.Index(fields=["subject", "-date"], name="grade_subject_date_idx"),
         ]
+
     def __str__(self) -> str:
         return f"{self.student.username} - {self.subject.name}: {self.value}"
 
@@ -150,5 +149,6 @@ class Homework(models.Model):
         indexes = [
             models.Index(fields=["schedule", "-date"], name="hw_schedule_date_idx"),
         ]
+
     def __str__(self) -> str:
-        return f"Homework for {self.date} on {self.schedule.subject.name} for {self.schedule.group.name}" 
+        return f"Homework for {self.date} on {self.schedule.subject.name} for {self.schedule.group.name}"

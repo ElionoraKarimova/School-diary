@@ -1,4 +1,6 @@
 from django.db import connection
+
+
 def student_average_via_plpgsql(student_id: int) -> float | None:
     with connection.cursor() as cursor:
         cursor.execute("SELECT student_average(%s);", [student_id])

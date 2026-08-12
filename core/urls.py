@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from gradebook.views import home_view, journal_view,admin_dashboard_view
+from gradebook.views import home_view, journal_view, admin_dashboard_view
 from rest_framework.routers import DefaultRouter
 from gradebook.api_views import ScheduleViewSet, GradeViewSet, HomeworkViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -26,6 +26,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+
 router = DefaultRouter()
 router.register(r"schedules", ScheduleViewSet, basename="api-schedules")
 router.register(r"grades", GradeViewSet, basename="api-grades")
@@ -39,7 +40,9 @@ urlpatterns = [
     path("admin-panel/", admin_dashboard_view, name="admin_dashboard"),
     path("api/v1/", include(router.urls)),
     path("api/v1/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/v1/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "api/v1/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+    ),
     path("api/v1/auth/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("api-auth/", include("rest_framework.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

@@ -69,6 +69,7 @@ class GradeViewSet(viewsets.ModelViewSet):
         average = student_average_via_plpgsql(student_id)
         return Response({"student_id": student_id, "average": average})
 
+
 class HomeworkViewSet(viewsets.ModelViewSet):
     queryset = Homework.objects.all().select_related("schedule__subject")
     serializer_class = HomeworkSerializer

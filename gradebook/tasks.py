@@ -1,10 +1,13 @@
 import logging
 from celery import shared_task
+
 logger = logging.getLogger("gradebook")
+
 
 @shared_task
 def notify_grade_created(grade_id: int) -> str:
     from .models import Grade
+
     try:
         grade = Grade.objects.select_related("student", "subject").get(pk=grade_id)
     except Grade.DoesNotExist:

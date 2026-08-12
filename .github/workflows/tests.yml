@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -7,7 +7,36 @@ on:
     branches: [ main ]
 
 jobs:
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dev dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Check formatting (black)
+        run: black --check gradebook core users
+
+      - name: Lint (flake8)
+        run: flake8 gradebook core users
+
+      - name: Type-check (mypy)
+        env:
+          SECRET_KEY: ci-typecheck
+          DEBUG: 'True'
+        run: mypy gradebook core users --config-file mypy.ini
+
   test:
+    name: Tests (Postgres)
     runs-on: ubuntu-latest
 
     services:
@@ -33,10 +62,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install dev dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Run tests
         env:
@@ -48,4 +77,5 @@ jobs:
           POSTGRES_PASSWORD: school_password
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
+          CELERY_TASK_ALWAYS_EAGER: 'True'
         run: pytest -v
