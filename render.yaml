@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: school-diary-web
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/docs/
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "True"
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: school-diary-db
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: school-diary-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: school-diary-db
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: school-diary-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: school-diary-db
+          property: port
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: school-diary-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: school-diary-redis
+          property: connectionString
+
+  - type: redis
+    name: school-diary-redis
+    plan: free
+    ipAllowList: []
+databases:
+  - name: school-diary-db
+    plan: free
